@@ -1,11 +1,37 @@
+#
+# linter.py
+# Linter for SublimeLinter3, a code checking framework for Sublime Text 3
+#
+# Written by Aparajita Fishman
+# Contributors: Francis Gulotta, Josh Hagins, Mark Haylock
+# Copyright (c) 2013 Aparajita Fishman
+#
+# License: MIT
+#
+
+"""This module exports the Rubocop plugin class."""
+
 import os
 from SublimeLinter.lint import RubyLinter
 
 
 class Rubocop(RubyLinter):
-    defaults = {
-        'selector': 'source.ruby - text.html - text.haml'
-    }
+    """Provides an interface to rubocop."""
+
+    syntax = (
+        'better rspec',
+        'betterruby',
+        'cucumber steps',
+        'rspec',
+        'ruby experimental',
+        'ruby on rails',
+        'ruby'
+    )
+    cmd = None
+    executable = 'ruby'
+    version_args = '-S rubocop --version'
+    version_re = r'(?P<version>\d+\.\d+\.\d+)'
+    version_requirement = '>= 0.34.0'
     regex = (
         r'^.+?:(?P<line>\d+):(?P<col>\d+): '
         r'(:?(?P<warning>[RCW])|(?P<error>[EF])): '
@@ -14,15 +40,8 @@ class Rubocop(RubyLinter):
 
     def cmd(self):
         """Build command, using STDIN if a file path can be determined."""
-
         settings = self.get_view_settings()
-
-        command = ['ruby', '-S']
-
-        if settings.get('use_bundle_exec', False):
-            command.extend(['bundle', 'exec'])
-
-        command.extend(['rubocop', '--format', 'emacs'])
+        command = self.executable_path + ['-S', 'bundle', 'exec', 'rubocop', '--format', 'emacs']
 
         # Set tempfile_suffix so by default a tempfile is passed onto rubocop:
         self.tempfile_suffix = 'rb'
